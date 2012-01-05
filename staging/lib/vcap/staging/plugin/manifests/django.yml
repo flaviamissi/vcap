@@ -8,5 +8,7 @@ runtimes:
       default: true
 app_servers:
 detection:
-  - "*.py": '.'
+  - "settings.py": true
 staged_services:
+  - "name": "mysql"
+    "version": "*"
