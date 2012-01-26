@@ -111,7 +111,7 @@ describe AppPackage do
       zipname = File.join(@tmpdir, "test.zip")
       unzipped_size = create_zip(zipname, 10, 1024)
       app_package = AppPackage.new([], File.new(zipname))
-      AppConfig[:max_droplet_size] = unzipped_size - 1024
+      AppConfig[:max_droplet_size] = 100
       em do
         Fiber.new do
           expect do
