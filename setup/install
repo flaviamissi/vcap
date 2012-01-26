@@ -85,11 +85,11 @@ rm $rvm_path/gemsets/global.gems
 echo "Installing various rubies"
 rvm install 1.9.2-p180
 rvm --default 1.9.2-p180
-rvm install 1.8.7-p352
+# rvm install 1.8.7-p352
 
 # install only rake 0.8.7
-rvm use 1.8.7-p352
-gem install rake --version '0.8.7' --no-rdoc --no-ri
+# rvm use 1.8.7-p352
+# gem install rake --version '0.8.7' --no-rdoc --no-ri
 
 rvm use 1.9.2-p180
 gem install rake --version '0.8.7' --no-rdoc --no-ri
@@ -125,7 +125,7 @@ sudo /etc/init.d/nginx restart
 echo "Installing bundler"
 cd ~/cloudfoundry/vcap
 gem install bundler --no-rdoc --no-ri
-rake bundler:install
+rake bundler:install:production
 
 # don't start up vcap in this shell
 # its best to exit the shell and then
