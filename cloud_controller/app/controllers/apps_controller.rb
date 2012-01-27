@@ -76,6 +76,7 @@ class AppsController < ApplicationController
 
   # POST /apps/:name/application
   def upload
+    # juju scp
     begin
       file = get_uploaded_file
       resources = json_param(:resources)

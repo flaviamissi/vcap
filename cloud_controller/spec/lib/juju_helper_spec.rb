@@ -14,7 +14,12 @@ describe "juju_helper#create_environment" do
 
   it "should create a new environment based on the app framework" do
     Kernel.should_receive(:exec).with("juju deploy --repository=/home/charms local:oneiric/django")
-    @juju.create_environment("django").should be_true
+    @juju.create_environment("django", "my_app").should be_true
+  end
+
+  it "should send the code to the environment using juju scp" do
+    Kernel.should_receive(:exec).with("juju scp arquivo.zip my_app/0:/home/application/")
+    @juju.push_code("arquivo.zip", "my_app").should be_true
   end
 
 end
