@@ -21,7 +21,7 @@ class AppsController < ApplicationController
     app = ::App.new(:owner => user, :name => name)
     begin
       update_app_from_params(app)
-      @juju.create_environment app.framework, app.name
+      @juju.create_service app.framework, app.name
     rescue => e
       app.destroy
       raise e
@@ -49,6 +49,7 @@ class AppsController < ApplicationController
   end
 
   def delete
+    @juju.destroy_service @app.name
     @app.purge_all_resources!
     @app.destroy
     render :nothing => true, :status => 200
@@ -88,6 +89,7 @@ class AppsController < ApplicationController
       resources = json_param(:resources)
       package = AppPackage.new(@app, file, resources)
       @app.latest_bits_from(package)
+      @juju.upload_code package, @app.name
     rescue AppPackageError => e
       CloudController.logger.error(e)
       raise CloudError.new(CloudError::RESOURCES_PACKAGING_FAILED, e.to_s)
