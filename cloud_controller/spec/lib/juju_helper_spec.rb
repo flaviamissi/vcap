@@ -19,7 +19,7 @@ describe "juju_helper#create_environment" do
 
   it "should send the code to the environment using juju scp" do
     Kernel.should_receive(:exec).with("juju scp arquivo.zip my_app/0:/home/application/")
-    @juju.push_code("arquivo.zip", "my_app").should be_true
+    @juju.upload_code("arquivo.zip", "my_app").should be_true
   end
 
 end

@@ -1,8 +1,13 @@
 require 'staging_task_manager'
+require 'juju_helper'
 
 class AppsController < ApplicationController
   before_filter :require_user, :except => [:download_staged]
   before_filter :find_app_by_name, :except => [:create, :list, :download_staged]
+
+  def initialize
+    @juju = JujuHelper.new
+  end
 
   def process_action(method_name, *args)
     app = @app ? @app.name : (params[:name] || (body_params && body_params[:name]))
@@ -16,6 +21,7 @@ class AppsController < ApplicationController
     app = ::App.new(:owner => user, :name => name)
     begin
       update_app_from_params(app)
+      @juju.create_environment app.framework, app.name
     rescue => e
       app.destroy
       raise e
@@ -308,46 +314,6 @@ class AppsController < ApplicationController
       CloudController.logger.error "app: #{app.id} Failed to save new app errors: #{app.errors}"
       raise CloudError.new(CloudError::APP_INVALID)
     end
-
-    Kernel.exec("juju deploy --repository=/home/charms local:oneiric/#{app.framework}")
-
-    # This needs to be called after the app is saved, but before staging.
-    # update_app_services(app)
-    # app.save if app.changed?
-
-    # Process any changes that require action on out part here.
-    # manager = AppManager.new(app)
-
-    # if app.needs_staging?
-    #   if user.uses_new_stager?
-    #     stage_app(app)
-    #   else
-    #     manager.stage
-    #   end
-    # end
-
-    # if changed.include?('state')
-    #   if app.stopped?
-    #     manager.stopped
-    #   elsif app.started?
-    #     manager.started
-    #   end
-    #   manager.updated
-    # elsif app.started?
-    #   # Instances (up or down) and uris we will handle in place, since it does not
-    #   # involve staging changes.
-    #   if changed.include?('instances')
-    #     manager.change_running_instances(delta_instances)
-    #     manager.updated
-
-    #     user_email = user ? user.email : 'N/A'
-    #     CloudController.events.user_event(user_email, app.name, "Changing instances to #{app.instances}", :SUCCEEDED)
-
-    #   end
-    # end
-
-    # Now add in URLs
-    # manager.update_uris if update_app_uris(app)
 
     yield(app) if block_given?
   end
