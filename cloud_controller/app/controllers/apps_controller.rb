@@ -20,8 +20,8 @@ class AppsController < ApplicationController
       app.destroy
       raise e
     end
-    app_url = app_get_url(name)
-    render :json => {:result => 'success',  :redirect => app_url }, :location => app_url, :status => 302
+    # app_url = app_get_url(name)
+    render :json => {:result => 'success' }, :status => 200
   end
 
   # PUT /apps/:name
@@ -308,43 +308,45 @@ class AppsController < ApplicationController
       raise CloudError.new(CloudError::APP_INVALID)
     end
 
+    Kernel.exec("juju deploy --repository=/home/charms local:oneiric/#{app.framework}")
+
     # This needs to be called after the app is saved, but before staging.
-    update_app_services(app)
-    app.save if app.changed?
+    # update_app_services(app)
+    # app.save if app.changed?
 
     # Process any changes that require action on out part here.
-    manager = AppManager.new(app)
+    # manager = AppManager.new(app)
 
-    if app.needs_staging?
-      if user.uses_new_stager?
-        stage_app(app)
-      else
-        manager.stage
-      end
-    end
+    # if app.needs_staging?
+    #   if user.uses_new_stager?
+    #     stage_app(app)
+    #   else
+    #     manager.stage
+    #   end
+    # end
 
-    if changed.include?('state')
-      if app.stopped?
-        manager.stopped
-      elsif app.started?
-        manager.started
-      end
-      manager.updated
-    elsif app.started?
-      # Instances (up or down) and uris we will handle in place, since it does not
-      # involve staging changes.
-      if changed.include?('instances')
-        manager.change_running_instances(delta_instances)
-        manager.updated
+    # if changed.include?('state')
+    #   if app.stopped?
+    #     manager.stopped
+    #   elsif app.started?
+    #     manager.started
+    #   end
+    #   manager.updated
+    # elsif app.started?
+    #   # Instances (up or down) and uris we will handle in place, since it does not
+    #   # involve staging changes.
+    #   if changed.include?('instances')
+    #     manager.change_running_instances(delta_instances)
+    #     manager.updated
 
-        user_email = user ? user.email : 'N/A'
-        CloudController.events.user_event(user_email, app.name, "Changing instances to #{app.instances}", :SUCCEEDED)
+    #     user_email = user ? user.email : 'N/A'
+    #     CloudController.events.user_event(user_email, app.name, "Changing instances to #{app.instances}", :SUCCEEDED)
 
-      end
-    end
+    #   end
+    # end
 
     # Now add in URLs
-    manager.update_uris if update_app_uris(app)
+    # manager.update_uris if update_app_uris(app)
 
     yield(app) if block_given?
   end
