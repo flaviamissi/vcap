@@ -2,6 +2,7 @@
 .idea
 \#*\#
 .\#*
+cloud_controller/vendor/cache
 .bundle
 bundler
 spec_reports
